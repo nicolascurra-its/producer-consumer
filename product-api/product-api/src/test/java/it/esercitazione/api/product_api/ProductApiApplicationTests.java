@@ -1,4 +1,4 @@
-package it.product.api.product_api;
+package it.esercitazione.api.product_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
