@@ -1,20 +1,3 @@
-Progetto Producer:
--------------------------------------------------------------------------------------------------------------------------------------------------------
-Database:
-database MySQL
-
-struttura tabelle:
-
-id BIGINT PRIMARY KEY
-nome VARCHAR(200)
-descrizione TEXT
-prezzo DECIMAL(10,2)
-categoria VARCHAR (100)
-quantita INT
-data_creazione TIMESTAMP
-
-comando creazione database completo:
-
 CREATE DATABASE IF NOT EXISTS esercitazione_api
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
@@ -31,8 +14,6 @@ CREATE TABLE prodotti (
     categoria VARCHAR(100) NOT NULL,
     quantita INT NOT NULL DEFAULT 0,
     data_creazione TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);
-
-comando inserimento dati di prova:
 
 INSERT INTO prodotti
 (nome, descrizione, prezzo, categoria, quantita, data_creazione)
@@ -197,49 +178,3 @@ VALUES
     29,
     '2026-09-20 11:45:00'
 );
--------------------------------------------------------------------------------------------------------------------------------------------------------
-Applicazione Producer:
-
-Application properties di base:
-
-spring.application.name=product-api
-
-server.port=8081
-
-spring.datasource.url=jdbc:mysql://localhost:3306/esercitazione_api
-spring.datasource.username=root
-spring.datasource.password=PASSWORD
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-
-struttura progetto:
-
-src/main/java
-└── it.esercitazione.api
-    ├── ProductApiApplication.java
-    │
-    ├── controller
-    │   └── ProdottoController.java
-    │
-    ├── service
-    │   └── ProdottoService.java
-    │
-    ├── repository
-    │   └── ProdottoRepository.java
-    │
-    ├── model
-    │   └── Prodotto.java
-    │
-    ├── dto
-    │   ├── ProdottoRequest.java
-    │   └── ProdottoResponse.java
-    │
-    └── exception
-        ├── ProdottoNotFoundException.java
-        └── GlobalExceptionHandler.java
-
-RICORDATI: Controller -> Service -> Repository -> Database
-Il controller NON DEVE mai comunicare direttamente con il database
-
