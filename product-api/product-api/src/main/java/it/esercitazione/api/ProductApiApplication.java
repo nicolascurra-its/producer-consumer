@@ -1,4 +1,4 @@
-package it.esercitazione.api.product_api;
+package it.esercitazione.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
