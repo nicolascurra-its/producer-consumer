@@ -1,10 +1,10 @@
 /**
- * Il service per l'entity `Animal`.
+ * Il service per l'entity `Prodotto`.
  * Implementa le operazioni di lettura, creazione, aggiornamento (parziale e di
- * stato) ed eliminazione, risolvendo le entità collegate a partire dai loro id.
+ * stato) ed eliminazione.
  *
- * @author Ismail Perta, Samuele Querio, Tommaso Fatticcioni
- * @since 29/06/2026
+ * @author Nicolas Currà
+ * @since 01/10/2026
  */
 
 package it.esercitazione.api.service;
@@ -14,30 +14,19 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import it.aftermath.dto.animal.AnimalRequest;
-import it.aftermath.dto.animal.AnimalResponse;
-import it.aftermath.dto.animal.CreateAnimalRequest;
-import it.aftermath.dto.common.NotesRequest;
-import it.aftermath.entity.Animal;
-import it.aftermath.entity.Race;
-import it.aftermath.entity.Registry;
-import it.aftermath.entity.Sex;
-import it.aftermath.entity.Species;
-import it.aftermath.exception.ResourceNotFoundException;
-import it.aftermath.repository.AnimalRepository;
-import it.aftermath.repository.RaceRepository;
-import it.aftermath.repository.RegistryRepository;
-import it.aftermath.repository.SexRepository;
-import it.aftermath.repository.SpeciesRepository;
-import it.aftermath.service.interfaces.AnimalService;
+import it.esercitazione.api.dto.ProdottoRequest;
+import it.esercitazione.api.dto.ProdottoResponse;
+import it.esercitazione.api.exception.ResourceNotFoundException;
+import it.esercitazione.api.repository.ProdottoRepository;
+import it.esercitazione.api.model.Prodotto;
 
 @Service
-public class ProdottoService implements AnimalService {
+public class ProdottoService{
 
     private final ProdottoRepository prodottoRepository;
 
-    public AnimalServiceImplementation(
-        ProdotoRepository prodottoRepository
+    public ProdottoService(
+        ProdottoRepository prodottoRepository
     ) {
         this.prodottoRepository = prodottoRepository;
     }
@@ -47,7 +36,6 @@ public class ProdottoService implements AnimalService {
      *
      * @return la lista di tutti i prodotti, eventualmente vuota.
      */
-    @Override
     public List<ProdottoResponse> getAll() {
         return prodottoRepository.findAll()
             .stream()
@@ -62,7 +50,6 @@ public class ProdottoService implements AnimalService {
      * @return il `Prodotto` corrispondente.
      * @throws ResourceNotFoundException se il prodotto non esiste.
      */
-    @Override
     public ProdottoResponse getById(int id) {
         return ProdottoResponse.fromProdotto(findProdottoOrThrow(id));
     }
@@ -73,7 +60,6 @@ public class ProdottoService implements AnimalService {
      * @param prezzo il prezzo del prodotto.
      * @return la lista dei prodotti, eventualmente vuota.
      */
-    @Override
     public List<ProdottoResponse> getAllByPrezzo(BigDecimal prezzo) {
         return prodottoRepository.findAllByPrezzo(prezzo)
                 .stream()
@@ -87,7 +73,6 @@ public class ProdottoService implements AnimalService {
      * @param cateoria la categoria del prodotto.
      * @return la lista dei prodotti, eventualmente vuota.
      */
-    @Override
     public List<ProdottoResponse> getAllByCategoria(String categoria) {
         return prodottoRepository.findAllByCategoria(categoria)
                 .stream()
@@ -101,9 +86,8 @@ public class ProdottoService implements AnimalService {
      * @param quantita la quantità di prodotto.
      * @return la lista dei prodotti, eventualmente vuota.
      */
-    @Override
     public List<ProdottoResponse> getAllByQuantita(int quantita) {
-        return animalRepository.findAllByQuantita(quantita)
+        return prodottoRepository.findAllByQuantita(quantita)
                 .stream()
                 .map(ProdottoResponse::fromProdotto)
                 .toList();
@@ -115,14 +99,13 @@ public class ProdottoService implements AnimalService {
      * @param dataCreazione la data di creazione del prodotto.
      * @return la lista di prodotti, eventualmente vuota.
      */
-    @Override
     public List<ProdottoResponse> getAllByDataCreazione(LocalDate dataCreazione) {
-        return animalRepository.findAllByDataCreazione(dataCreazione)
+        return prodottoRepository.findAllByDataCreazione(dataCreazione)
                 .stream()
                 .map(ProdottoResponse::fromProdotto)
                 .toList();
     }
-//-------------------------------------------------------------------------------------------
+
     /**
      * Aggiunge un nuovo Prodotto al database.
      * I campi sono già validati da Bean Validation nel controller; qui vengono
@@ -132,116 +115,65 @@ public class ProdottoService implements AnimalService {
      * @return l'`AnimalResponse` dell'animale appena creato.
      * @throws ResourceNotFoundException se sesso, specie, razza o anagrafica non esistono.
      */
-    @Override
-    public AnimalResponse addAnimal(CreateAnimalRequest request) {
-        Animal animal = new Animal();
-        animal.setName(request.name());
-        animal.setBirthDate(request.birthDate());
-        animal.setWeight(request.weight());
-        animal.setMicrochip(request.microchip());
-        animal.setSex(findSexOrThrow(request.sexId()));
-        animal.setSpecies(findSpeciesOrThrow(request.speciesId()));
-        animal.setRace(findRaceOrThrow(request.raceId()));
-        animal.setRegistry(findRegistryOrThrow(request.registryId()));
-        animal.setDeleted(false);
+    public ProdottoResponse addProdotto(ProdottoRequest request) {
+        Prodotto prodotto = new Prodotto();
+        prodotto.setNome(request.name());
+        prodotto.setPrezzo(request.prezzo());
+        prodotto.setCategoria(request.categoria());
+        prodotto.setQuantita(request.quantita());
+        prodotto.setDataCreazione(request.dataCreazione());
+        prodotto.setDeleted(false);
 
-        return AnimalResponse.fromAnimal(animalRepository.save(animal));
+        return ProdottoResponse.fromProdotto(prodottoRepository.save(prodotto));
     }
 
     /**
-     * Aggiorna in modo parziale i dati anagrafici di un animale.
+     * Aggiorna in modo parziale i dati di un prodotto.
      * Vengono modificati solo i campi valorizzati nella richiesta; i campi
      * {@code null} lasciano invariato il valore esistente. Note e stato non
      * sono modificabili da questa operazione.
      *
-     * @param id l'id dell'animale da aggiornare.
-     * @param animalRequest i dati da aggiornare (campi opzionali).
-     * @return l'`AnimalResponse` dell'animale aggiornato.
-     * @throws ResourceNotFoundException se l'animale o una delle entità collegate indicate non esistono.
+     * @param id l'id del prodotto da aggiornare.
+     * @param prodottoRequest i dati da aggiornare (campi opzionali).
+     * @return l'`ProdottoResponse` del prodotto aggiornato.
+     * @throws ResourceNotFoundException se il prodotto o una delle entità collegate indicate non esistono.
      */
-    @Override
-    public AnimalResponse updateAnimal(int id, AnimalRequest animalRequest) {
-        Animal animal = findAnimalOrThrow(id);
+    public ProdottoResponse updateProdotto(int id, ProdottoRequest prodottoRequest) {
+        Prodotto prodotto = findProdottoOrThrow(id);
 
-        if (animalRequest.name() != null)
-            animal.setName(animalRequest.name());
+        if (prodottoRequest.name() != null)
+            prodotto.setNome(prodottoRequest.name());
         
-        if (animalRequest.birthDate() != null)
-            animal.setBirthDate(animalRequest.birthDate());
+        if (prodottoRequest.prezzo() != null)
+            prodotto.setPrezzo(prodottoRequest.prezzo());
         
-        if (animalRequest.weight() != null)
-            animal.setWeight(animalRequest.weight());
+        if (prodottoRequest.categoria() != null)
+            prodotto.setCategoria(prodottoRequest.categoria());
         
-        if (animalRequest.microchip() != null)
-            animal.setMicrochip(animalRequest.microchip());
+        if (prodottoRequest.quantita() != null)
+            prodotto.setQuantita(prodottoRequest.quantita());
         
-        if (animalRequest.sexId() != null)
-            animal.setSex(findSexOrThrow(animalRequest.sexId()));
-        
-        if (animalRequest.speciesId() != null)
-            animal.setSpecies(findSpeciesOrThrow(animalRequest.speciesId()));
-        
-        if (animalRequest.raceId() != null)
-            animal.setRace(findRaceOrThrow(animalRequest.raceId()));
-        
-        if (animalRequest.registryId() != null)
-            animal.setRegistry(findRegistryOrThrow(animalRequest.registryId()));
-        
+        if (prodottoRequest.dataCreazione() != null)
+            prodotto.setDataCreazione(prodottoRequest.dataCreazione());
 
-        return AnimalResponse.fromAnimal(animalRepository.save(animal));
+        return ProdottoResponse.fromProdotto(prodottoRepository.save(prodotto));
     }
 
     /**
-     * Aggiorna le note di un animale.
+     * Eliminazione logica di un Prodotto dal database.
      *
-     * @param id           l'id dell'animale.
-     * @param notesRequest le nuove note.
-     * @return l'`AnimalResponse` dell'animale aggiornato.
-     * @throws ResourceNotFoundException se l'animale non esiste.
+     * @param id l'id del prodotto da eliminare.
+     * @throws ResourceNotFoundException se il prodotto non esiste.
      */
-    @Override
-    public AnimalResponse updateNotes(int id, NotesRequest notesRequest) {
-        Animal animal = findAnimalOrThrow(id);
-        animal.setNotes(notesRequest.notes());
-        return AnimalResponse.fromAnimal(animalRepository.save(animal));
+    public void deleteProdottoById(int id) {
+        Prodotto prodotto = findProdottoOrThrow(id);
+        prodotto.setDeleted(true);
+        prodottoRepository.save(prodotto);
     }
 
-    /**
-     * Eliminazione logica di un animale dal database.
-     *
-     * @param id l'id dell'animale da eliminare.
-     * @throws ResourceNotFoundException se l'animale non esiste.
-     */
-    @Override
-    public void deleteAnimalById(int id) {
-        Animal animal = findAnimalOrThrow(id);
-        animal.setDeleted(true);
-        animalRepository.save(animal);
-    }
-
-    private Animal findAnimalOrThrow(int id) {
-        return animalRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Animale non trovato con id " + id + "."));
-    }
-
-    private Sex findSexOrThrow(int id) {
-        return sexRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Sesso non trovato con id " + id + "."));
-    }
-
-    private Species findSpeciesOrThrow(int id) {
-        return speciesRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Specie non trovata con id " + id + "."));
-    }
-
-    private Race findRaceOrThrow(int id) {
-        return raceRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Razza non trovata con id " + id + "."));
-    }
-
-    private Registry findRegistryOrThrow(int id) {
-        return registryRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Anagrafica non trovata con id " + id + "."));
+    private Prodotto findProdottoOrThrow(int id) {
+        return prodottoRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Prodotto non trovato con id " + id + "."));
     }
 
 }

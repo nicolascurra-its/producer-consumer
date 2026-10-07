@@ -9,7 +9,7 @@ package it.esercitazione.api.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import it.esercitazione.entity.Prodotto;
+import it.esercitazione.api.model.Prodotto;
 
 public record ProdottoResponse(
 	int id,
@@ -24,7 +24,7 @@ public record ProdottoResponse(
 	public static ProdottoResponse fromProdotto(Prodotto prodotto) {
 		return new ProdottoResponse(
 			prodotto.getId(),
-			prodotto.getName(),
+			prodotto.getNome(),
 			prodotto.getDescrizione(),
 			prodotto.getPrezzo(),
 			prodotto.getCategoria(),
