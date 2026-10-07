@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prodotti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container"><a class="brand" th:href="@{/prodotti}">Catalogo Prodotti</a></div>
+</header>
+
+<main class="container">
+    <h1>Prodotti</h1>
+
+    <form class="card search" th:action="@{/prodotti}" method="get">
+        <div class="field">
+            <label for="nome">Cerca prodotto</label>
+            <input type="text" id="nome" name="nome" th:value="${nome}" placeholder="es. laptop">
+        </div>
+        <div class="field">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" name="categoria">
+                <option value="">Tutte</option>
+                <option th:each="c : ${categorie}" th:value="${c}" th:text="${c}"
+                        th:selected="${c == categoria}">Categoria</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="ordine">Ordina per prezzo</label>
+            <select id="ordine" name="ordine">
+                <option value="">Nessun ordinamento</option>
+                <option value="asc" th:selected="${ordine == 'asc'}">Crescente</option>
+                <option value="desc" th:selected="${ordine == 'desc'}">Decrescente</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Cerca</button>
+            <a class="reset" th:href="@{/prodotti}">Azzera</a>
+        </div>
+    </form>
+
+    <div class="alert" th:if="${erroreTitolo != null}">
+        <strong th:text="${erroreTitolo}">Impossibile recuperare i prodotti.</strong>
+        <span th:text="${erroreMessaggio}">Il servizio API non è attualmente disponibile.</span>
+    </div>
+
+    <div th:if="${erroreTitolo == null}">
+        <p class="count" th:text="${#lists.size(prodotti)} + ' prodotti trovati'">0 prodotti trovati</p>
+        <div class="table-wrap card" style="padding:0">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th class="num">Prezzo</th>
+                    <th class="num">Quantità</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${prodotti}">
+                    <td th:text="${p.id}">1</td>
+                    <td><a th:href="@{/prodotti/{id}(id=${p.id})}" th:text="${p.nome}">Nome</a></td>
+                    <td th:text="${p.categoria}">Categoria</td>
+                    <td class="num" th:text="'€ ' + ${#numbers.formatDecimal(p.prezzo, 1, 'POINT', 2, 'COMMA')}">€ 0,00</td>
+                    <td class="num" th:text="${p.quantita}">0</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(prodotti)}">
+                    <td colspan="5" class="empty">Nessun prodotto trovato per i criteri indicati.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+</body>
+</html>

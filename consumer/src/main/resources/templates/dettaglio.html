@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${prodotto.nome}">Dettaglio prodotto</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container"><a class="brand" th:href="@{/prodotti}">Catalogo Prodotti</a></div>
+</header>
+
+<main class="container">
+    <article class="card detail">
+        <h1 th:text="${prodotto.nome}">Nome prodotto</h1>
+
+        <dl>
+            <dt>Categoria</dt>
+            <dd th:text="${prodotto.categoria}">Categoria</dd>
+
+            <dt>Prezzo</dt>
+            <dd th:text="'€ ' + ${#numbers.formatDecimal(prodotto.prezzo, 1, 'POINT', 2, 'COMMA')}">€ 0,00</dd>
+
+            <dt>Quantità disponibile</dt>
+            <dd th:text="${prodotto.quantita}">0</dd>
+
+            <dt th:if="${prodotto.dataCreazione != null}">Inserito il</dt>
+            <dd th:if="${prodotto.dataCreazione != null}"
+                th:text="${#temporals.format(prodotto.dataCreazione, 'dd/MM/yyyy HH:mm')}">01/01/2026 00:00</dd>
+        </dl>
+
+        <div>
+            <strong>Descrizione:</strong>
+            <p class="descrizione" th:text="${prodotto.descrizione}">Descrizione</p>
+        </div>
+
+        <a class="back" th:href="@{/prodotti}">← Torna all'elenco</a>
+    </article>
+</main>
+</body>
+</html>

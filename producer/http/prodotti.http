@@ -1,0 +1,60 @@
+### Tutti i prodotti
+GET http://localhost:8081/api/prodotti
+
+### Dettaglio
+GET http://localhost:8081/api/prodotti/1
+
+### Filtro per categoria
+GET http://localhost:8081/api/prodotti?categoria=Informatica
+
+### Ricerca per nome
+GET http://localhost:8081/api/prodotti?nome=laptop
+
+### Ordinamento per prezzo decrescente
+GET http://localhost:8081/api/prodotti?sort=prezzo&direction=desc
+
+### Combinazione: categoria + ordinamento
+GET http://localhost:8081/api/prodotti?categoria=Accessori&sort=prezzo&direction=asc
+
+### Combinazione: nome + ordinamento
+GET http://localhost:8081/api/prodotti?nome=pro&sort=prezzo&direction=desc
+
+### Creazione (201)
+POST http://localhost:8081/api/prodotti
+Content-Type: application/json
+
+{
+  "nome": "Notebook Gaming",
+  "descrizione": "Notebook ad alte prestazioni",
+  "prezzo": 1599.90,
+  "categoria": "Informatica",
+  "quantita": 8
+}
+
+### Aggiornamento (200)
+PUT http://localhost:8081/api/prodotti/5
+Content-Type: application/json
+
+{
+  "nome": "Mouse Wireless Pro X",
+  "descrizione": "Mouse wireless professionale",
+  "prezzo": 69.90,
+  "categoria": "Accessori",
+  "quantita": 42
+}
+
+### Eliminazione (204)
+DELETE http://localhost:8081/api/prodotti/20
+
+### Prodotto inesistente (404)
+GET http://localhost:8081/api/prodotti/9999
+
+### Dati non validi (400)
+POST http://localhost:8081/api/prodotti
+Content-Type: application/json
+
+{
+  "nome": "",
+  "prezzo": -5,
+  "categoria": "Informatica"
+}

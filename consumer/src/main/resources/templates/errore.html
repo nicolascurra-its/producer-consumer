@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Errore</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container"><a class="brand" th:href="@{/prodotti}">Catalogo Prodotti</a></div>
+</header>
+
+<main class="container">
+    <div class="alert">
+        <strong th:text="${titolo}">Errore</strong>
+        <span th:text="${messaggio}">Si è verificato un errore.</span>
+    </div>
+    <a class="back" th:href="@{/prodotti}">← Torna all'elenco</a>
+</main>
+</body>
+</html>
