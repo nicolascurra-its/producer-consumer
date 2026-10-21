@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: esercitazione-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: esercitazione_api
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  producer:
+    image: simonealbanese/producer-api:1.0
+    container_name: esercitazione-producer
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/esercitazione_api?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      db:
+        condition: service_healthy
+
+  consumer:
+    image: simonealbanese/consumer-web:1.0
+    container_name: esercitazione-consumer
+    ports:
+      - "8082:8082"
+    environment:
+      # Imposta solo il dominio/porta base, senza /api/prodotti
+      PRODUCER_API_URL: http://producer:8081
+    depends_on:
+      - producer
+volumes:
+  mysql-data:

@@ -46,7 +46,7 @@ public class ProdottoApiClient {
             List<ProdottoDTO> risultato = restClient.get()
                     .uri(uriBuilder -> {
                         Map<String, Object> variabili = new HashMap<>();
-                        uriBuilder.path("/prodotti");
+                        uriBuilder.path("/api/prodotti"); // <-- CORRETTO: aggiunto /api
                         aggiungiParametro(uriBuilder, variabili, "nome", nome);
                         aggiungiParametro(uriBuilder, variabili, "categoria", categoria);
                         aggiungiParametro(uriBuilder, variabili, "sort", sort);
@@ -67,7 +67,7 @@ public class ProdottoApiClient {
     public ProdottoDTO trovaPerId(Long id) {
         try {
             ProdottoDTO prodotto = restClient.get()
-                    .uri("/prodotti/{id}", id)
+                    .uri("/api/prodotti/{id}", id) // <-- CORRETTO: aggiunto /api
                     .retrieve()
                     .body(ProdottoDTO.class);
             if (prodotto == null) {
