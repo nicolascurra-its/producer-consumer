@@ -40,7 +40,7 @@ L'applicazione è composta da tre servizi isolati che comunicano all'interno di 
 ## 2. Tecnologie Utilizzate
 
 - **Java 21**
-- **Spring Boot 3** (Spring Data JPA, Web, Thymeleaf)
+- **Spring Boot 4** (Spring Data JPA, Web, Thymeleaf)
 - **MySQL 8.0**
 - **Docker** & **Docker Compose**
 - **Maven**
@@ -77,7 +77,23 @@ esercitazione-api/
 
 ---
 
-## 5. Guida all'Avvio e al Rilascio
+## 5. Struttura del Database
+### specifiche Database
+Username: root; Password: root
+Porta: 3306
+
+### Struttura tabella utilizzata per il salvataggio di ogni prodotto
+CREATE TABLE prodotti (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(200) NOT NULL,
+    descrizione TEXT,
+    prezzo DECIMAL(10,2) NOT NULL,
+    categoria VARCHAR(100) NOT NULL,
+    quantita INT NOT NULL DEFAULT 0,
+    data_creazione TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+## 6. Guida all'Avvio e al Rilascio
 
 ### Prerequisiti
 - Docker Desktop / Docker Engine installato e attivo.
@@ -86,8 +102,11 @@ esercitazione-api/
 ---
 
 ### Rilascio da Immagini Docker Hub
-Non richiede il codice sorgente né ambienti Java/Maven locali.
+## link DockerHub per il download delle immagini
+docker pull simonealbanese/producer-api:1.0
+docker pull simonealbanese/consumer-web:1.0
 
+## utilizzo delle immagini
 1. Posizionarsi nella radice dove risiede il file `compose.yaml`.
 2. Scaricare le immagini da Docker Hub:
    ```bash
@@ -100,7 +119,7 @@ Non richiede il codice sorgente né ambienti Java/Maven locali.
 
 ---
 
-## 6. Verifica degli Endpoints
+## 7. Verifica degli Endpoints
 
 Una volta avviati i container, è possibile accedere ai servizi:
 
@@ -109,14 +128,19 @@ Una volta avviati i container, è possibile accedere ai servizi:
 
 ---
 
-## 7. Configurazione Rete e Persistenza
+## 8. Configurazione Rete e Persistenza
 
 - **Docker Network**: I container comunicano tra loro utilizzando i nomi dei servizi definiti nel file `compose.yaml` (`producer` per le API REST e `db` per il database MySQL).
 - **Docker Volume**: I dati del database vengono mantenuti nel volume gestito `mysql-data` caricato nel percorso `/var/lib/mysql`. Ciò garantisce che i dati sopravvivano anche fermando o distruggendo i container.
 
 ---
 
-## 8. Comandi di Gestione
+## 9. Comandi di Gestione
+
+- **Avvio del container:**
+  ```bash
+  docker compose up -d
+  ```
 
 - **Visualizzare lo stato dei container:**
   ```bash
@@ -142,3 +166,7 @@ Una volta avviati i container, è possibile accedere ai servizi:
   ```bash
   docker compose down
   ```
+
+## 10. Percentuale di utilizzo delle AI generative
+### Utilizzo di AI generative in percentuale rispetto a sè stesso, non sull'influenza nel progetto finito
+Claude: 50%; Gemini: 50%.
