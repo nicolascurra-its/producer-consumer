@@ -1,35 +1,20 @@
 # Esercitazione: Containerizzazione e Rilascio con Docker (Producer-Consumer)
 
-Progetto di evolutiva per la containerizzazione e il rilascio di un'architettura microservizi Spring Boot (Producer/Consumer) con database MySQL, gestita tramite Docker e Docker Compose.
+## 1. Collaboratori e AI
+
+| Ruolo | Nome |
+| :--- | :--- |
+| **Sviluppatore** | Simone Albanese |
+| **Sviluppatore** | Nicolas Curra |
+| **Sviluppatore** | Gabriele Serrain |
+
+**Utilizzo AI:** Claude 30%, Gemini 30%, sviluppo manuale 40%
 
 ---
 
-## 1. Architettura dell'Applicazione
+## 2. Descrizione progetto
 
 L'applicazione è composta da tre servizi isolati che comunicano all'interno di una rete Docker condivisa (`esercitazione-api_default`):
-
-```text
-                                Docker Network
-┌─────────────────────────────────────────────────────────────────────────┐
-│                                                                         │
-│   ┌──────────────┐          HTTP REST          ┌──────────────┐         │
-│   │   Consumer   │ ──────────────────────────> │   Producer   │         │
-│   │    :8082     │  http://producer:8081/api   │    :8081     │         │
-│   └──────────────┘                             └──────┬───────┘         │
-│                                                       │                 │
-│                                                       │ JDBC            │
-│                                                       v                 │
-│                                                ┌──────────────┐         │
-│                                                │    MySQL     │         │
-│                                                │    :3306     │         │
-│                                                └──────┬───────┘         │
-│                                                       │                 │
-│                                                ┌──────v───────┐         │
-│                                                │ Docker Volume│         │
-│                                                └──────────────┘         │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
-```
 
 - **Consumer (`consumer-web`)**: Applicazione Web Spring Boot + Thymeleaf che espone la UI sulla porta `8082`. Comunica esclusivamente con il Producer e **non accede mai direttamente al database**.
 - **Producer (`producer-api`)**: REST API Spring Boot sulla porta `8081` che gestisce la logica di business e il catalogo prodotti.
@@ -37,22 +22,13 @@ L'applicazione è composta da tre servizi isolati che comunicano all'interno di 
 
 ---
 
-## 2. Tecnologie Utilizzate
+## 3. Tecnologie Utilizzate
 
 - **Java 21**
-- **Spring Boot 4** (Spring Data JPA, Web, Thymeleaf)
+- **Spring Boot 4.1.1** (Spring Data JPA, Web, Thymeleaf)
 - **MySQL 8.0**
-- **Docker** & **Docker Compose**
+- **Docker**
 - **Maven**
-
----
-
-## 3. Immagini Docker Hub
-
-Le immagini containerizzate sono state pubblicate su Docker Hub:
-
-- **Producer API**: `simonealbanese/producer-api:1.0`
-- **Consumer Web**: `simonealbanese/consumer-web:1.0`
 
 ---
 
@@ -65,11 +41,13 @@ esercitazione-api/
 ├── README.md
 │
 ├── producer/
+    ├── README.md
 │   ├── Dockerfile
 │   ├── pom.xml
 │   └── src/
 │
 └── consumer/
+    ├── README.md
     ├── Dockerfile
     ├── pom.xml
     └── src/
@@ -77,42 +55,54 @@ esercitazione-api/
 
 ---
 
-## 5. Struttura del Database
-### specifiche Database
-Username: root; Password: root
-Porta: 3306
+## 5. Configurazione dei Servizi
 
-### Struttura tabella utilizzata per il salvataggio di ogni prodotto
-CREATE TABLE prodotti (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(200) NOT NULL,
-    descrizione TEXT,
-    prezzo DECIMAL(10,2) NOT NULL,
-    categoria VARCHAR(100) NOT NULL,
-    quantita INT NOT NULL DEFAULT 0,
-    data_creazione TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+### Configurazione MySQL (`db`)
+- **Immagine:** `mysql:8.0`
+- **Porta Host:** `3306`
+- **Variabili d'ambiente:**
+  - `MYSQL_ROOT_PASSWORD=root`
+  - `MYSQL_DATABASE=esercitazione_api`
+- **Inizializzazione:** Mappatura dello script SQL `./producer/sql/esercitazione_api.sql` in `/docker-entrypoint-initdb.d/` per il popolamento automatico del DB.
 
-## 6. Guida all'Avvio e al Rilascio
+### Configurazione Producer (`producer`)
+- **Immagine:** `simonealbanese/producer-api:1.0`
+- **Porta Host:** `8081`
+- **Variabili d'ambiente:**
+  - `SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/esercitazione_api?useSSL=false&allowPublicKeyRetrieval=true`
+  - `SPRING_DATASOURCE_USERNAME=root`
+  - `SPRING_DATASOURCE_PASSWORD=root`
 
-### Prerequisiti
-- Docker Desktop / Docker Engine installato e attivo.
-- Docker Compose.
+### Configurazione Consumer (`consumer`)
+- **Immagine:** `simonealbanese/consumer-web:1.0`
+- **Porta Host:** `8082`
+- **Variabili d'ambiente:**
+  - `PRODUCER_API_URL=http://producer:8081`
 
 ---
 
-### Rilascio da Immagini Docker Hub
-## link DockerHub per il download delle immagini
-docker pull simonealbanese/producer-api:1.0
-docker pull simonealbanese/consumer-web:1.0
+## 6. Guida all'Avvio
 
-## utilizzo delle immagini
-1. Posizionarsi nella radice dove risiede il file `compose.yaml`.
-2. Scaricare le immagini da Docker Hub:
+### Prerequisiti
+- Docker Desktop / Docker Engine installato.
+
+---
+
+### Istruzioni per l'avvio
+
+1. clonare la repository
+   ```bash
+   git clone https://github.com/nicolascurra-its/producer-consumer.git
+   ```
+2. Posizionarsi nella radice dove risiede il file `compose.yaml`.
+   ```bash
+   cd producer-consumer
+   ```
+3. Scaricare le immagini da Docker Hub:
    ```bash
    docker compose pull
    ```
-3. Avviare i container in background:
+4. Avviare i container in background:
    ```bash
    docker compose up -d
    ```
@@ -125,48 +115,3 @@ Una volta avviati i container, è possibile accedere ai servizi:
 
 - **Interfaccia Grafica Consumer**: http://localhost:8082/prodotti
 - **REST API Producer**: http://localhost:8081/api/prodotti
-
----
-
-## 8. Configurazione Rete e Persistenza
-
-- **Docker Network**: I container comunicano tra loro utilizzando i nomi dei servizi definiti nel file `compose.yaml` (`producer` per le API REST e `db` per il database MySQL).
-- **Docker Volume**: I dati del database vengono mantenuti nel volume gestito `mysql-data` caricato nel percorso `/var/lib/mysql`. Ciò garantisce che i dati sopravvivano anche fermando o distruggendo i container.
-
----
-
-## 9. Comandi di Gestione
-
-- **Avvio del container:**
-  ```bash
-  docker compose up -d
-  ```
-
-- **Visualizzare lo stato dei container:**
-  ```bash
-  docker ps
-  ```
-
-- **Visualizzare i log in tempo reale:**
-  ```bash
-  docker compose logs -f
-  ```
-
-- **Visualizzare i log di un singolo servizio (es. Producer):**
-  ```bash
-  docker compose logs -f producer
-  ```
-
-- **Arrestare i servizi (mantenendo i dati nel volume):**
-  ```bash
-  docker compose stop
-  ```
-
-- **Arrestare e rimuovere container e rete:**
-  ```bash
-  docker compose down
-  ```
-
-## 10. Percentuale di utilizzo delle AI generative
-### Utilizzo di AI generative in percentuale rispetto a sè stesso, non sull'influenza nel progetto finito
-Claude: 50%; Gemini: 50%.
