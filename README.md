@@ -8,7 +8,7 @@
 | **Sviluppatore** | Nicolas Curra |
 | **Sviluppatore** | Gabriele Serrain |
 
-**Utilizzo AI:** Claude 30%, Gemini 30%, sviluppo manuale 40%
+**Utilizzo AI:** Claude 20%, Gemini 30%, sviluppo manuale 50%
 
 ---
 
