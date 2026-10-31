@@ -14,7 +14,7 @@
 
 ## 2. Descrizione progetto
 
-L'applicazione è composta da tre servizi isolati che comunicano all'interno di una rete Docker condivisa (`esercitazione-api_default`):
+L'applicazione è composta da tre servizi isolati che comunicano all'interno di una rete Docker condivisa (`producer-consumer_default`):
 
 - **Consumer (`consumer-web`)**: Applicazione Web Spring Boot + Thymeleaf che espone la UI sulla porta `8082`. Comunica esclusivamente con il Producer e **non accede mai direttamente al database**.
 - **Producer (`producer-api`)**: REST API Spring Boot sulla porta `8081` che gestisce la logica di business e il catalogo prodotti.
@@ -35,22 +35,26 @@ L'applicazione è composta da tre servizi isolati che comunicano all'interno di 
 ## 4. Struttura del Progetto
 
 ```text
-esercitazione-api/
+producer-consumer/
 │
-├── compose.yaml
-├── README.md
-│
-├── producer/
-    ├── README.md
+├── consumer/
+│   ├── src/
+│   ├── target/
 │   ├── Dockerfile
 │   ├── pom.xml
-│   └── src/
+│   └── README.md
 │
-└── consumer/
-    ├── README.md
-    ├── Dockerfile
-    ├── pom.xml
-    └── src/
+├── producer/
+│   ├── http/
+│   ├── sql/
+│   ├── src/
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── README.md
+│
+├── compose.yaml
+└── README.md
+
 ```
 
 ---
@@ -90,13 +94,30 @@ esercitazione-api/
 
 ### Istruzioni per l'avvio
 
-1. Scaricare le immagini da Docker Hub:
+1. Posizionarsi nella cartella `producer-consumer`
+
+2. avviare i container:
+   ```bash
+   docker compose up -d
+   ```
+
+### Comandi utili
+
+1. Scaricare le immagini (vengono gia scaricate quando fai docker compose up -d) da Docker Hub:
    ```bash
    docker compose pull
    ```
-2. Avviare i container in background:
+2. Verificare i container in esecuzione:
    ```bash
-   docker compose up -d
+   docker compose ps
+   ```
+3. Arrestare e cancellare container, reti, volumi:
+   ```bash
+   docker compose down -v
+   ```
+4. Vedere i log in tempo reale dei servizi:
+   ```bash
+   docker compose logs -f
    ```
 
 ---
