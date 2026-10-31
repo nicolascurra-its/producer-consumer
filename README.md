@@ -90,11 +90,11 @@ esercitazione-api/
 
 ### Istruzioni per l'avvio
 
-3. Scaricare le immagini da Docker Hub:
+1. Scaricare le immagini da Docker Hub:
    ```bash
    docker compose pull
    ```
-4. Avviare i container in background:
+2. Avviare i container in background:
    ```bash
    docker compose up -d
    ```
