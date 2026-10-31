@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mysql:8.0
@@ -11,8 +9,9 @@ services:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./producer/sql/esercitazione_api.sql:/docker-entrypoint-initdb.d/esercitazione_api.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -37,7 +36,6 @@ services:
     ports:
       - "8082:8082"
     environment:
-      # Imposta solo il dominio/porta base, senza /api/prodotti
       PRODUCER_API_URL: http://producer:8081
     depends_on:
       - producer

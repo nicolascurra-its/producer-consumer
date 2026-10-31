@@ -1,153 +1,110 @@
-# Producer – `product-api`
+# Esercitazione: Containerizzazione e Rilascio con Docker (Producer-Consumer)
 
-## Collaboratori
 
-- _[Inserire nome e cognome degli studenti]_
-- **AI:** Claude (Anthropic) – generazione del codice e della documentazione
+# 1. Architettura dell'Applicazione
 
-## Descrizione del progetto
+L'applicazione è composta da tre servizi isolati che comunicano all'interno di una rete Docker condivisa (`esercitazione-api_default`):
 
-Applicazione Spring Boot che gestisce il catalogo prodotti e lo espone tramite **REST API**
-(`http://localhost:8081/api/prodotti`). I dati sono persistiti su **MySQL** (database
-`esercitazione_api`, tabella `prodotti`) tramite Spring Data JPA / Hibernate.
+- **Consumer (`consumer-web`)**: Applicazione Web Spring Boot + Thymeleaf che espone la UI sulla porta `8082`. Comunica esclusivamente con il Producer e **non accede mai direttamente al database**.
+- **Producer (`producer-api`)**: REST API Spring Boot sulla porta `8081` che gestisce la logica di business e il catalogo prodotti.
+- **Database (`esercitazione-db`)**: Database MySQL 8.0 sulla porta `3306`.
 
-È la parte *Producer* del sistema: la *Consumer Application* (`../consumer`) legge i dati solo
-tramite queste API, senza accedere al database.
+---
 
-```
-Controller → Service → Repository → MySQL
-```
+# 2. Tecnologie Utilizzate
 
-## Tecnologie utilizzate
+- **Java 21**
+- **Spring Boot 4.1.1** (Spring Data JPA, Web, Thymeleaf)
+- **MySQL 8.0**
+- **Docker**
+- **Maven**
 
-Java 21 · Spring Boot 4 · Spring Web (MVC) · Spring Data JPA · Hibernate · Bean Validation ·
-MySQL · Lombok · Maven
+---
 
-## Requisiti necessari
+# 3. Immagini Docker Hub
 
-- JDK 21
-- Maven 3.9+
-- MySQL 8+ in esecuzione su `localhost:3306`
+Le immagini containerizzate sono state pubblicate su Docker Hub:
 
-## Configurazione MySQL
+- **Producer API**: `simonealbanese/producer-api:1.0`
+- **Consumer Web**: `simonealbanese/consumer-web:1.0`
 
-Creare database, tabella e dati iniziali con lo script fornito:
+---
 
-```bash
-mysql -u root -p < sql/esercitazione_api.sql
-```
+# 4. Struttura del Progetto
 
-Verifica (devono risultare 20 prodotti):
-
-```sql
-USE esercitazione_api;
-SELECT * FROM prodotti;
-```
-
-> Lo script contiene `DROP TABLE IF EXISTS prodotti`: rieseguirlo riporta la tabella allo stato iniziale.
-> In alternativa si può creare solo il database e lasciare che Hibernate crei la tabella
-> (`spring.jpa.hibernate.ddl-auto=update`), ma in tal caso la tabella parte vuota.
-
-## Configurazione della Producer
-
-File `src/main/resources/application.properties`:
-
-| Property | Valore |
-|---|---|
-| `spring.application.name` | `product-api` |
-| `server.port` | `8081` |
-| `spring.datasource.url` | `jdbc:mysql://localhost:3306/esercitazione_api?...` |
-| `spring.datasource.username` | `root` |
-| `spring.datasource.password` | `${DB_PASSWORD:PASSWORD}` |
-| `spring.jpa.hibernate.ddl-auto` | `update` |
-
-Impostare la password MySQL locale, oppure modificando il file, oppure con la variabile d'ambiente:
-
-```bash
-export DB_PASSWORD=la_mia_password      # Linux / macOS
-set DB_PASSWORD=la_mia_password         # Windows (cmd)
+```text
+esercitazione-api/
+│
+├── compose.yaml
+├── README.md
+│
+├── producer/
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── src/
+│
+└── consumer/
+    ├── Dockerfile
+    ├── pom.xml
+    └── src/
 ```
 
-## Istruzioni per l'avvio
+---
 
-```bash
-cd producer
-mvn spring-boot:run
-```
+# 5. Database (MySQL)
 
-Verifica: <http://localhost:8081/api/prodotti>
+Il servizio MySQL viene eseguito in un container Docker dedicato e configurato tramite le seguenti credenziali predefinite (modificabili via variabili d'ambiente nel `compose.yaml`):
 
-Il file `http/prodotti.http` contiene tutte le richieste di test (REST Client di IntelliJ IDEA / VS Code).
+- **Host (locale):** `localhost:3306`
+- **Host (interno alla rete Docker):** `db:3306`
+- **Database:** `esercitazione_api`
+- **Username:** `root`
+- **Password:** `root`
 
-## REST API disponibili
+# 6. Guida all'Avvio e al Rilascio
 
-Base URL: `http://localhost:8081/api/prodotti`
+## Prerequisiti
+- Docker Desktop / Docker Engine installato.
 
-| Metodo | Endpoint | Descrizione | Risposta |
-|---|---|---|---|
-| GET | `/api/prodotti` | Elenco prodotti (con filtri opzionali) | 200 |
-| GET | `/api/prodotti/{id}` | Dettaglio prodotto | 200 / 404 |
-| POST | `/api/prodotti` | Crea un prodotto | 201 / 400 |
-| PUT | `/api/prodotti/{id}` | Aggiorna un prodotto | 200 / 400 / 404 |
-| DELETE | `/api/prodotti/{id}` | Elimina un prodotto | 204 / 404 |
+---
 
-### Parametri di ricerca (`GET /api/prodotti`)
+## Comandi
 
-Tutti opzionali e **combinabili**:
+## utilizzo delle immagini
+1. Posizionarsi nella radice dove risiede il file `compose.yaml`.
+2. Scaricare le immagini da Docker Hub:
+   ```bash
+   docker compose pull
+   ```
+3. Avviare i container in background:
+   ```bash
+   docker compose up -d
+   ```
 
-| Parametro | Descrizione | Esempio |
-|---|---|---|
-| `categoria` | Filtro per categoria (case-insensitive) | `?categoria=Informatica` |
-| `nome` | Il nome *contiene* il termine (case-insensitive) | `?nome=laptop` |
-| `sort` | Campo di ordinamento: `prezzo` (default dell'esercitazione), `nome`, `categoria`, `quantita`, `dataCreazione` | `?sort=prezzo` |
-| `direction` | `asc` (default) o `desc` | `?sort=prezzo&direction=desc` |
+---
 
-Esempi combinati:
+## 7. Verifica degli Endpoints
 
-```
-GET /api/prodotti?categoria=Accessori&sort=prezzo&direction=asc
-GET /api/prodotti?nome=pro&sort=prezzo&direction=desc
-```
+Una volta avviati i container, è possibile accedere ai servizi:
 
-### Esempio di body (POST / PUT)
+- **Interfaccia Grafica Consumer**: http://localhost:8082/prodotti
+- **REST API Producer**: http://localhost:8081/api/prodotti
 
-```json
-{
-  "nome": "Notebook Gaming",
-  "descrizione": "Notebook per gaming e sviluppo software",
-  "prezzo": 1599.90,
-  "categoria": "Informatica",
-  "quantita": 10
-}
-```
+---
 
-Validazione: `nome` e `categoria` obbligatori, `prezzo` obbligatorio e ≥ 0 (max 2 decimali),
-`quantita` obbligatoria e ≥ 0.
+## 8. Configurazione Rete e Persistenza
 
-### Gestione errori
+- **Docker Network**: I container comunicano tra loro utilizzando i nomi dei servizi definiti nel file `compose.yaml` (`producer` per le API REST e `db` per il database MySQL).
+- **Docker Volume**: I dati del database vengono mantenuti nel volume gestito `mysql-data` caricato nel percorso `/var/lib/mysql`. Ciò garantisce che i dati sopravvivano anche fermando o distruggendo i container.
 
-Gli errori sono gestiti in modo centralizzato (`@RestControllerAdvice`) e restituiscono:
+---
 
-```json
-{
-  "status": 404,
-  "message": "Prodotto non trovato",
-  "timestamp": "2026-09-28T18:30:00"
-}
-```
+## 9. Collaboratori e AI
 
-| Caso | Status |
-|---|---|
-| Prodotto inesistente | 404 |
-| Dati non validi, JSON malformato, `sort`/`direction` non validi, id non numerico | 400 |
-| Metodo HTTP non supportato | 405 |
-| Errore imprevisto | 500 |
+| Ruolo | Nome |
+| :--- | :--- |
+| **Sviluppatore** | Simone Albanese |
+| **Sviluppatore** | Nicolas Curra |
+| **Sviluppatore** | Gabriele Serrain |
 
-## Funzionalità aggiuntive implementate
-
-- DTO dedicati `ProdottoRequest` / `ProdottoResponse`: l'Entity JPA non viene mai esposta dal controller.
-- Validazione dei dati in ingresso con Bean Validation.
-- Ordinamento anche su `nome`, `categoria`, `quantita`, `dataCreazione`, con ordine stabile (a parità di valore, per `id`).
-- Header `Location` nella risposta `201 Created`.
-
-Non implementata: autenticazione (Spring Security), come concordato.
+**Utilizzo AI:** Claude 30%, Gemini 30%, sviluppo manuale 40%
