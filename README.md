@@ -90,14 +90,6 @@ esercitazione-api/
 
 ### Istruzioni per l'avvio
 
-1. clonare la repository
-   ```bash
-   git clone https://github.com/nicolascurra-its/producer-consumer.git
-   ```
-2. Posizionarsi nella radice dove risiede il file `compose.yaml`.
-   ```bash
-   cd producer-consumer
-   ```
 3. Scaricare le immagini da Docker Hub:
    ```bash
    docker compose pull
